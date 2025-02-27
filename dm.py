@@ -34,7 +34,7 @@ def perfect_heart_dataset(n=8000):
     return TensorDataset(torch.from_numpy(X.astype(np.float32)))
 
 
-def generate_3mode_gaussian_dataset(n=8000, means=None, covs=None, weights=None):
+def generate_3mode_gaussian_dataset(n=8000, means=None, covs=None, weights=None, R=None):
     """
     生成一个 3-mode Gaussian Mixture Model (GMM) 的数据集。
 
@@ -56,7 +56,10 @@ def generate_3mode_gaussian_dataset(n=8000, means=None, covs=None, weights=None)
     if means is None:
         means = [np.array([-10, 10]), np.array([10, 10]), np.array([0, -10])]
     if covs is None:
-        covs = [np.eye(2), np.eye(2), np.eye(2)]
+        # covs = [np.eye(2), np.eye(2), np.eye(2)]
+
+        # 构造对角元素分别为 1, 10, 100 的协方差矩阵
+        covs = [np.diag([1, 1]), np.diag([10, 10]), np.diag([100, 100])]
     if weights is None:
         weights = [0.4, 0.4, 0.2]
 
