@@ -33,6 +33,96 @@ def perfect_heart_dataset(n=8000):
     X /= 5
     return TensorDataset(torch.from_numpy(X.astype(np.float32)))
 
+
+def generate_3mode_gaussian_dataset(n=8000, means=None, covs=None, weights=None):
+    """
+    生成一个 3-mode Gaussian Mixture Model (GMM) 的数据集。
+
+    参数:
+        n (int): 数据点的总数，默认为 8000。
+        means (list of arrays): 每个高斯分布的均值，默认为 [[-2, -2], [2, 2], [0, 0]]。
+        covs (list of arrays): 每个高斯分布的协方差矩阵，默认为 [ [[1, 0], [0, 1]], [[1, 0], [0, 1]], [[1, 0], [0, 1]] ]。
+        weights (list of floats): 每个高斯分布的权重，默认为 [0.4, 0.4, 0.2]。
+
+    返回:
+        TensorDataset: 包含生成的数据点的 PyTorch 数据集。
+    """
+
+    print("-" * 50)
+    print("using three mode guassian")
+    print("-" * 50)
+
+    # 默认参数
+    if means is None:
+        means = [np.array([-10, 10]), np.array([10, 10]), np.array([0, -10])]
+    if covs is None:
+        covs = [np.eye(2), np.eye(2), np.eye(2)]
+    if weights is None:
+        weights = [0.4, 0.4, 0.2]
+
+    # 确保权重总和为 1
+    weights = np.array(weights)
+    weights /= weights.sum()
+
+    # 生成每个高斯分布的数据点数量
+    n_samples = np.random.multinomial(n, weights)
+
+    # 生成数据
+    X = []
+    for i in range(3):
+        samples = []
+        mean = means[i]
+        cov = covs[i]
+        while len(samples) < n_samples[i]:
+            # 从当前高斯分布中采样一个点
+            sample = np.random.multivariate_normal(mean, cov)
+            if R is None or np.linalg.norm(sample - mean) <= R:
+                samples.append(sample)
+        X.append(np.array(samples))
+    X = np.vstack(X)
+
+    # 打乱数据
+    np.random.shuffle(X)
+
+    # 转换为 PyTorch 张量并返回 TensorDataset
+    return TensorDataset(torch.from_numpy(X.astype(np.float32)))
+
+
+def perfect_circle_dataset(n=8000, radius=1.0):
+    """
+    生成一个圆形数据集。
+
+    参数:
+        n (int): 数据点的数量，默认为 8000。
+        radius (float): 圆的半径，默认为 1.0。
+        noise_std (float): 添加到数据点上的高斯噪声的标准差，默认为 0.02。
+
+    返回:
+        TensorDataset: 包含圆形数据点的 PyTorch 数据集。
+    """
+
+    print("-" * 50)
+    print("using circle dataset")
+    print("-" * 50)
+
+    rng = np.random.default_rng(42)  # 随机数生成器，种子固定为 42
+    theta = 2 * np.pi * rng.uniform(0, 1, n)  # 生成 n 个随机角度，范围 [0, 2π)
+
+    # 圆的参数方程
+    x = radius * np.cos(theta)
+    y = radius * np.sin(theta)
+
+    # # 添加高斯噪声
+    # if noise_std > 0:
+    #     x += rng.normal(0, noise_std, n)
+    #     y += rng.normal(0, noise_std, n)
+
+    # 将 x 和 y 堆叠成一个二维数组
+    X = np.stack((x, y), axis=1)
+
+    # 转换为 PyTorch 张量并返回 TensorDataset
+    return TensorDataset(torch.from_numpy(X.astype(np.float32)))
+
 def mnist_dataset(train=True):
     from torchvision.datasets import MNIST
     from torchvision import transforms
@@ -47,7 +137,9 @@ def mnist_dataset(train=True):
 
 def get_dataset(name, n=8000):
     if name == "heart":
-        return perfect_heart_dataset(n)
+        # return perfect_heart_dataset(n)
+        # return perfect_circle_dataset(n)
+        return generate_3mode_gaussian_dataset(n)
     elif name == "mnist":
         return mnist_dataset()
     else:
