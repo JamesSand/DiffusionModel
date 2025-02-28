@@ -59,7 +59,7 @@ def generate_3mode_gaussian_dataset(n=8000, means=None, covs=None, weights=None,
         # covs = [np.eye(2), np.eye(2), np.eye(2)]
 
         # 构造对角元素分别为 1, 10, 100 的协方差矩阵
-        covs = [np.diag([1, 1]), np.diag([10, 10]), np.diag([100, 100])]
+        covs = [np.diag([100, 100]), np.diag([100, 100]), np.diag([100, 100])]
     if weights is None:
         weights = [0.4, 0.4, 0.2]
 
